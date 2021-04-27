@@ -39,7 +39,7 @@ def send_schedule(text):
 
 def edit_photo(id, text):
     global attachments
-    image = f'static/pictures/{random.choice([i for i in range(1, 4)])}.jpg'
+    image = f'static/pictures/{random.choice([i for i in range(1, 10)])}.jpg'
     image1 = Image.open(image)
     image1 = image1.resize((500, 600))
     draw_text = ImageDraw.Draw(image1)
