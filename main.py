@@ -5,8 +5,9 @@ from vk_api.longpoll import VkLongPoll, VkEventType
 from PIL import Image, ImageDraw, ImageFont
 import random
 import os
+from settings import token
 
-vk_sess = vk_api.VkApi(token='32e1c4d8d1360ced570756d0a743f65bb494a8f489dd3a8300c414e2698cacf472ba5b7c48ca2c2622371')
+vk_sess = vk_api.VkApi(token=token())
 longpoll = VkLongPoll(vk_sess)
 api = vk.API(vk_sess)
 uploader = VkUpload(vk_sess)
@@ -68,8 +69,8 @@ for event in longpoll.listen():
             if text == 'расписание':
                 send_msg(id, 'Введи день и я пришлю тебе расписание на этот день')
 
-            elif text == 'начать' or text == 'старт':
-                send_msg(id, f'Привет! Введи команду:\n- Расписание\n - Картинка')
+            elif text == 'начать' or text == 'старт' or text == 'команды':
+                send_msg(id, f'Привет! Введи команду:\nРасписание\nКартинка')
 
             elif text == 'картинка':
                 send_msg(id, 'Введи текст к картинке')
