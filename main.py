@@ -51,11 +51,11 @@ def horoscope():
     teacher_secondName = morph.parse(teacher[1])[0]
     if type_of_ganger == '1':
         text = f'''Гороскоп на сегодня\n
-    Стоит отсерегаться {teacher_name.inflect({'accs'}).word.capitalize()} {teacher_secondName.inflect({'accs'}).word.capitalize()}'''
+    Стоит остерегаться {teacher_name.inflect({'accs'}).word.capitalize()} {teacher_secondName.inflect({'accs'}).word.capitalize()}'''
     elif type_of_ganger == '2':
         text = f'''!!!ВНИМАНИЕ!!!\n
 Сегодня у {teacher_name.inflect({'gent'}).word.capitalize()} {teacher_secondName.inflect({'gent'}).word.capitalize()}
-активируется шеринган. Лучше не приходить в школу'''
+активируется шаринган. Лучше не приходить в школу...'''
     else:
         text = f'''Сегодня планеты встали в ряд!\n
 {teacher_name.word.capitalize()} {teacher_secondName.word.capitalize()} не даст работу! Ура!!!!'''
