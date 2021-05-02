@@ -6,6 +6,8 @@ from PIL import Image, ImageDraw, ImageFont
 import random
 import os
 from settings import token
+import datetime
+import pymorphy2
 
 vk_sess = vk_api.VkApi(token=token())
 longpoll = VkLongPoll(vk_sess)
@@ -14,6 +16,8 @@ uploader = VkUpload(vk_sess)
 last_text = ''
 attachments = []
 not_command = False
+morph = pymorphy2.MorphAnalyzer()
+
 
 schedule = {
     'понедельник': [f'{c + 1} - {i}' for c, i in enumerate(
@@ -28,10 +32,34 @@ schedule = {
         ["Информатика", "Английский язык", "Практикум по математике", "Биология", "Русский язык", "Литература"])]
 }
 
+teachers = ['Екатерина Викторовна', 'Любовь Федоровна', 'Олеся Михайловна', 'Наталья Юрьевна', 'Вера Геннадьевна',
+            'Алексей Петрович', 'Елена Васильевна', 'Наталья Викторовна']
+
 
 def send_msg(id, text):
     vk_sess.method('messages.send',
                    {'user_id': id, 'message': text, 'random_id': 0, 'attachment': ','.join(attachments)})
+
+
+def horoscope():
+    global teachers
+    type_of_ganger = random.choices(['1', '2', '3'], weights=[80, 15, 5])[0]
+    teacher = random.choice(teachers).split()
+    print(type_of_ganger)
+    print(teacher)
+    teacher_name = morph.parse(teacher[0])[0]
+    teacher_secondName = morph.parse(teacher[1])[0]
+    if type_of_ganger == '1':
+        text = f'''Гороскоп на сегодня\n
+    Стоит отсерегаться {teacher_name.inflect({'accs'}).word.capitalize()} {teacher_secondName.inflect({'accs'}).word.capitalize()}'''
+    elif type_of_ganger == '2':
+        text = f'''!!!ВНИМАНИЕ!!!\n
+Сегодня у {teacher_name.inflect({'gent'}).word.capitalize()} {teacher_secondName.inflect({'gent'}).word.capitalize()}
+активируется шеринган. Лучше не приходить в школу'''
+    else:
+        text = f'''Сегодня планеты встали в ряд!\n
+{teacher_name.word.capitalize()} {teacher_secondName.word.capitalize()} не даст работу! Ура!!!!'''
+    send_msg(id, text)
 
 
 def send_schedule(text):
@@ -98,3 +126,5 @@ for event in longpoll.listen():
 
             print(f'--Text: {text}, --LastText: {last_text}')
             last_text = text
+    if datetime.datetime.now().hour == 8:
+        horoscope()
