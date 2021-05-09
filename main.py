@@ -6,8 +6,9 @@ from PIL import Image, ImageDraw, ImageFont
 import random
 import os
 from settings import token
-import datetime
 import pymorphy2
+import datetime
+from threading import Timer
 
 vk_sess = vk_api.VkApi(token=token())
 longpoll = VkLongPoll(vk_sess)
@@ -17,6 +18,11 @@ last_text = ''
 attachments = []
 not_command = False
 morph = pymorphy2.MorphAnalyzer()
+date_now = datetime.datetime.now()
+date_need = date_now.replace(day=date_now.day+1, hour=8, minute=0, second=0, microsecond=0)
+delta_t = date_need - date_now
+
+secs = delta_t.seconds + 1
 
 
 schedule = {
@@ -54,12 +60,18 @@ def horoscope():
     Стоит остерегаться {teacher_name.inflect({'accs'}).word.capitalize()} {teacher_secondName.inflect({'accs'}).word.capitalize()}'''
     elif type_of_ganger == '2':
         text = f'''!!!ВНИМАНИЕ!!!\n
-Сегодня у {teacher_name.inflect({'gent'}).word.capitalize()} {teacher_secondName.inflect({'gent'}).word.capitalize()}
-активируется шаринган. Лучше не приходить в школу...'''
+    Сегодня у {teacher_name.inflect({'gent'}).word.capitalize()} {teacher_secondName.inflect({'gent'}).word.capitalize()}
+    активируется шаринган. Лучше не приходить в школу...'''
     else:
         text = f'''Сегодня планеты встали в ряд!\n
-{teacher_name.word.capitalize()} {teacher_secondName.word.capitalize()} не даст работу! Ура!!!!'''
-    send_msg(id, text)
+    {teacher_name.word.capitalize()} {teacher_secondName.word.capitalize()} не даст работу! Ура!!!!'''
+    with open('users.txt', 'r') as file:
+        while True:
+            user_id = file.readline()
+            if not user_id:
+                break
+            send_msg(int(user_id), text)
+    file.close()
 
 
 def send_schedule(text):
@@ -86,11 +98,24 @@ def edit_photo(id, text):
     attachments.append(f'photo{upload_image["owner_id"]}_{upload_image["id"]}')
     os.remove('static/pictures/photo_to_user.jpg')
 
-
+print('timer')
+timer = Timer(secs, horoscope)
+timer.start()
+print('timer_started')
 for event in longpoll.listen():
     if event.type == VkEventType.MESSAGE_NEW and event.to_me:
         attachments = []
         id = event.user_id
+        with open('users.txt', 'r+') as file:
+            users_id = [i.strip('\n') for i in file.readlines()]
+            print(str(id))
+            print(users_id)
+            print(str(id) not in users_id)
+            if str(id) not in users_id:
+                file.write(str(id) + '\n')
+
+        file.close()
+
         if event.text:
             text = event.text.lower()
 
@@ -126,5 +151,5 @@ for event in longpoll.listen():
 
             print(f'--Text: {text}, --LastText: {last_text}')
             last_text = text
-    if datetime.datetime.now().hour == 8:
-        horoscope()
+
+
