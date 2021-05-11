@@ -19,11 +19,10 @@ attachments = []
 not_command = False
 morph = pymorphy2.MorphAnalyzer()
 date_now = datetime.datetime.now()
-date_need = date_now.replace(day=date_now.day+1, hour=8, minute=0, second=0, microsecond=0)
+date_need = date_now.replace(day=date_now.day + 1, hour=5, minute=0, second=0, microsecond=0)
 delta_t = date_need - date_now
 
 secs = delta_t.seconds + 1
-
 
 schedule = {
     'понедельник': [f'{c + 1} - {i}' for c, i in enumerate(
@@ -98,6 +97,7 @@ def edit_photo(id, text):
     attachments.append(f'photo{upload_image["owner_id"]}_{upload_image["id"]}')
     os.remove('static/pictures/photo_to_user.jpg')
 
+
 print('timer')
 timer = Timer(secs, horoscope)
 timer.start()
@@ -151,5 +151,3 @@ for event in longpoll.listen():
 
             print(f'--Text: {text}, --LastText: {last_text}')
             last_text = text
-
-
