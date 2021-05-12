@@ -25,6 +25,7 @@ delta_t = date_need - date_now
 secs = delta_t.seconds + 1
 
 schedule = {
+    'воскресенье': 'На этот день нет расписания',
     'понедельник': [f'{c + 1} - {i}' for c, i in enumerate(
         ["География", "Русский язык", "Литература", "Практикум", "Алгебра", "Химия", "Английский язык"])],
     'вторник': [f'{c + 1} - {i}' for c, i in
@@ -34,8 +35,11 @@ schedule = {
     'четверг': [f'{c + 1} - {i}' for c, i in
                 enumerate(["Геометрия", "Физ-ра", "Английский язык", "Физика", "Химия", "Алгебра", "Литература"])],
     'пятница': [f'{c + 1} - {i}' for c, i in enumerate(
-        ["Информатика", "Английский язык", "Практикум по математике", "Биология", "Русский язык", "Литература"])]
+        ["Информатика", "Английский язык", "Практикум по математике", "Биология", "Русский язык", "Литература"])],
+    'суббота': 'На этот день нет расписания'
 }
+
+allow_command = ['сегодня', 'завтра']
 
 teachers = ['Екатерина Викторовна', 'Любовь Федоровна', 'Олеся Михайловна', 'Наталья Юрьевна', 'Вера Геннадьевна',
             'Алексей Петрович', 'Елена Васильевна', 'Наталья Викторовна']
@@ -46,12 +50,16 @@ def send_msg(id, text):
                    {'user_id': id, 'message': text, 'random_id': 0, 'attachment': ','.join(attachments)})
 
 
+def check_date(text):
+    global schedule
+    dates = list(schedule.keys())
+    return dates[int(text)]
+
+
 def horoscope():
     global teachers
     type_of_ganger = random.choices(['1', '2', '3'], weights=[80, 15, 5])[0]
     teacher = random.choice(teachers).split()
-    print(type_of_ganger)
-    print(teacher)
     teacher_name = morph.parse(teacher[0])[0]
     teacher_secondName = morph.parse(teacher[1])[0]
     if type_of_ganger == '1':
@@ -108,9 +116,6 @@ for event in longpoll.listen():
         id = event.user_id
         with open('users.txt', 'r+') as file:
             users_id = [i.strip('\n') for i in file.readlines()]
-            print(str(id))
-            print(users_id)
-            print(str(id) not in users_id)
             if str(id) not in users_id:
                 file.write(str(id) + '\n')
 
@@ -130,7 +135,7 @@ for event in longpoll.listen():
                 not_command = True
 
             else:
-                if text not in schedule.keys() and not_command is False:
+                if text not in schedule.keys() and text not in allow_command and not_command is False:
                     send_msg(id, 'Моя твоя не понимать!!! Введи команду корректно')
 
             if last_text == 'расписание':
@@ -144,6 +149,17 @@ for event in longpoll.listen():
                     send_schedule(text)
                 elif text == 'пятница':
                     send_schedule(text)
+                elif text == 'сегодня':
+                    date_today = check_date(datetime.datetime.now().strftime('%w'))
+                    send_schedule(date_today)
+                elif text == 'завтра':
+                    date_today = datetime.datetime.now()
+                    date_tom = check_date(date_today.replace(day=date_today.day + 1, month=date_today.month,
+                                                     year=date_today.year).strftime('%w'))
+                    send_schedule(date_tom)
+
+
+
             if last_text == 'картинка':
                 edit_photo(id, text)
                 send_msg(id, '')
